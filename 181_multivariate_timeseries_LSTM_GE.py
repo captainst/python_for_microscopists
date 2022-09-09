@@ -8,7 +8,7 @@ Code tested on Tensorflow: 2.2.0
 dataset: https://finance.yahoo.com/quote/GE/history/
 Also try S&P: https://finance.yahoo.com/quote/%5EGSPC/history?p=%5EGSPC
 """
-
+#%%
 import numpy as np
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM
@@ -19,32 +19,60 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 #from datetime import datetime
 
+#%%
+import tensorflow as tf
+print(tf.__version__)
+
+#%%
 #Read the csv file
 df = pd.read_csv('data/GE.csv')
 print(df.head()) #7 columns, including the Date. 
 
+#%%
 #Separate dates for future plotting
 train_dates = pd.to_datetime(df['Date'])
 print(train_dates.tail(15)) #Check last few dates. 
 
+#%%
+print(type(train_dates))
+
+#%%
 #Variables for training
 cols = list(df)[1:6]
 #Date and volume columns are not used in training. 
 print(cols) #['Open', 'High', 'Low', 'Close', 'Adj Close']
 
+#%%
+"""
+获取list类型的结果
+col = df.columns.values.tolist() # 方法1
+col = df.columns.tolist() # 方法2
+col = [column for column in df] # 方法3
+col = list(df.columns.values) # 方法4
+col = list(df) # 方法5
+col = list(df.columns) # 方法6
+
+上面六种方法得到的结果都一样
+"""
+print(df.columns[1:6].values)
+
+
+#%%
 #New dataframe with only training data - 5 columns
 df_for_training = df[cols].astype(float)
 
-# df_for_plot=df_for_training.tail(5000)
-# df_for_plot.plot.line()
+#%%
+df_for_plot=df_for_training.tail(5000)
+df_for_plot.plot.line()
 
+#%%
 #LSTM uses sigmoid and tanh that are sensitive to magnitude so values need to be normalized
 # normalize the dataset
 scaler = StandardScaler()
 scaler = scaler.fit(df_for_training)
 df_for_training_scaled = scaler.transform(df_for_training)
 
-
+#%%
 #As required for LSTM networks, we require to reshape an input data into n_samples x timesteps x n_features. 
 #In this example, the n_features is 5. We will make timesteps = 14 (past days data used for training). 
 
